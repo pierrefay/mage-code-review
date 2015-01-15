@@ -62,7 +62,7 @@ echo ''
 echo '--------- "new" dans le code ----------'
 echo '--------- "new" dans le code ----------' >> 'analyse_code_new.log'
 echo $(find "$TRAVAIL/app/code" -name "*" -exec grep -Hn "= new " {} \; | awk '{print $1}' | wc -l) " new dans le code"
-find "$TRAVAIL/app/code" -name "*" -exec grep -Hn "= new" {} \; >> 'analyse_code_new.log'
+find "$TRAVAIL/app/code" -name "*" -exec grep -Hn "= new " {} \; >> 'analyse_code_new.log'
 echo "> analyse_code_new.log"
 
 echo ''
