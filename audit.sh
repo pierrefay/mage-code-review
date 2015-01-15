@@ -68,7 +68,8 @@ echo "> analyse_code_new.log"
 echo ''
 echo '--------- "load" dans le code ----------'
 echo '--------- "load" dans le code ----------' >> 'analyse_code_load.log'
-echo $(find "$TRAVAIL/app/code" -name "*" -exec grep -Hn '>load(' {} \; | awk '{print $1}' | wc -l) " load dans le code"
+echo $(find "$TRAVAIL/app/code/local" -name "*" -exec grep -Hn '>load(' {} \; | awk '{print $1}' | wc -l) " load dans local"
+echo $(find "$TRAVAIL/app/code/community" -name "*" -exec grep -Hn '>load(' {} \; | awk '{print $1}' | wc -l) " load dans community"
 find "$TRAVAIL/app/code" -name "*" -exec grep -Hn '>load(' {} \; >> 'analyse_code_load.log'
 echo "> analyse_code_load.log"
 
