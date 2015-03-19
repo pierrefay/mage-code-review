@@ -9,9 +9,6 @@ class Audit:
 	def __init__(self):
 		"""commentaires"""
 
-	def lunchSearch(self, path, dossierLog):
-		return self.nbrNamespaceAndModule(path, dossierLog);
-
 	# Fonction qui liste le nombre de namespaces et de modules	
 	def nbrNamespaceAndModule(self, path, dossierLog):
 		retour="-----------------------\n"
@@ -23,55 +20,55 @@ class Audit:
 		nombreDeNamespacesTotal = 0	
 		for codePool in codePoolDirs:
 			namespaceDirs = os.listdir(path+'app/code/'+codePool+'/')
-			nombreDeNamespaces = rep.countFolders(path+'app/code/'+codePool+'/');
+			nombreDeNamespaces = rep.countFolders(path+'app/code/'+codePool+'/')
 			nombreDeModules = 0
 			nombreDeNamespacesTotal+=nombreDeNamespaces
 			for namespace in namespaceDirs:
-				nombreDeModules += rep.countFolders(path+'app/code/'+codePool+'/'+namespace+'/');
+				nombreDeModules += rep.countFolders(path+'app/code/'+codePool+'/'+namespace+'/')
 			nombreDeModulesTotal = nombreDeModulesTotal + nombreDeModules
 			retour +=  "> codePool : "+codePool+" ("+str(nombreDeNamespaces)+" namespaces,"+str(nombreDeModules)+" modules) \n"
 		retour+="\n"
 		retour+="Total  :  "+str(nombreDeNamespacesTotal)+" namespaces et "+str(nombreDeModulesTotal)+" modules. \n"
 		retour+="-----------------------\n"
 		
-		fichierlog = open(dossierLog+"etatModules.txt",'w')
-		fwrite(fichierlog, retour)	
-		fclsoe(fichierlog)	
+		fichierlog = open(dossierLog+"etatModules.txt",'w+')
+		fichierlog.write(retour)	
+		fichierlog.close()	
 		return retour
 
 
-	# Fonction qui repere les loads dans les templates
+	# Fonction qui analyse les templates
 	def analyserTemplates(self, path, dossierLog):	
-		#variables utililsees pour les sorties des fonctions
-		fichierLog = open(dossierLog+"load-in-template.txt", "w")
-		nbrLoadInTemplate=0;
-		
-		#parcours
+
+		#DEBUT LOADS IN TEMPLATES		
 		rep = Repertoire()	
-		dirs = os.listdir(path)		
+		dirs = os.listdir(path)	
 		for ligne in dirs:			
 			if os.path.isdir(path+ligne):
-				nbrLoadInTemplate+= self.analyserTemplates(path+ligne+"/", fichierLog)
+				self.analyserTemplates(path+ligne+"/", dossierLog)
 			else:
 				#ici on est dans chaque fichier du dossier
 				if(ligne.endswith('.phtml')):
-					nbrLoadInTemplate += self.searchForLoads(path+ligne, fichierLog)					
-				#elif(ligne.endswith('.xml')):		
-		fichierLog.close()
-		return nbrLoadInTemplate
+					self.searchForLoads(path+ligne, dossierLog)	
+				#elif(ligne.endswith('.xml')):	
+
+		return None
 
 	# Fonction qui repere les loads dans les templates
-	def searchForLoads(self, path, fichierLog):		
-		
-		fichier = open(path, "r")
+	def searchForLoads(self, path, dossierLog):
+		fichier = open(path, 'r')
 		nbrLigne=0	
-		nbrLoads=0	
+		nbrLoads=0		
+		fichierLog = open(dossierLog+"load-in-template.html", "a+")	
 		for ligne in fichier:
-			nbrLigne+=1
-			if re.search("->load\(",ligne):
-				log= path+"  | ligne "+str(nbrLigne)+"  | "+ligne.strip(" \t\n\r")+"\n"
-				fichierLog.write(log);
+			nbrLigne+=1	
+			result = re.search("->load\(",ligne)
+					
+			if result is not None:
+				fichierLog.write("<tr><td>"+path+"</td><td>"+str(nbrLigne)+"</td><td>"+ligne.strip(" \t\n\r")+"</td></tr>\n")	
 				nbrLoads+=1
+
+		fichierLog.close()
 		return nbrLoads
 
 
