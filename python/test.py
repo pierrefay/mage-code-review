@@ -60,6 +60,18 @@ for res in tab:
 
 loadsTemplatesLog.write("</table>\n")
 
+### new dans templates  ###
+loadsTemplatesLog.write("<h2>New dans les templates</h2>\n")
+loadsTemplatesLog.write("<p>On utilise jamais une instanciation directement via un \"new\" sur magento.</p>\n")
+loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
+loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Code concerné</th></tr>\n")
+
+tab=resultTpl['search_for_new']
+for res in tab:
+	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
+
+loadsTemplatesLog.write("</table>\n")
+
 ###
 ### Fin du fichier
 ###

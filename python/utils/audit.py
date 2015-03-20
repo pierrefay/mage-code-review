@@ -46,6 +46,7 @@ class Audit:
 			results['search_for_load']=[]
 			results['search_for_getblock']=[]
 			results['search_for_createblock']=[]
+			results['search_for_new']=[]
 		else:
 			results=tab
 
@@ -71,7 +72,13 @@ class Audit:
 					search_for_createblock =self.searchForCreateblock(path+ligne, dossierLog)
 					if(len(search_for_createblock) is not 0):
 						results['search_for_createblock'].append(search_for_createblock)
+					
+					#new dans les templates
+					search_for_new =self.searchForNew(path+ligne, dossierLog)
+					if(len(search_for_new) is not 0):
+						results['search_for_new'].append(search_for_new)
 	
+
 				#elif(ligne.endswith('.xml')):	
 
 		return results
@@ -130,6 +137,47 @@ class Audit:
 			result = re.search("->createBlock\(",ligne)
 			resultWidgetName = re.search("customer/widget_",ligne)					
 			if ( result is not None ) and ( resultWidgetName is None ):
+				retours = {}
+				retours['path'] = path
+				retours['ligne'] = str(nbrLigne)  
+				retours['contents']=ligne.strip(" \t\n\r")	
+				retoursAll.append(retours)
+				nbrLoads+=1
+		return retoursAll
+
+	#
+	# Fonction qui repere les new dans les templates
+	#
+	def searchForNew(self, path, dossierLog):
+		fichier = open(path, 'r')
+		nbrLigne=0	
+		nbrLoads=0
+		isInScript=0	
+		isInComment=0
+		retoursAll=[]
+		for ligne in fichier:
+			inscript_one = re.search("text/javascript",ligne)
+			inscript_two = re.search("script",ligne)
+			inscript_three = re.search("<script>",ligne)
+			outcript = re.search("</script",ligne)		
+			intraduct = re.search("__\(",ligne)
+
+			incomment = re.search("\/\*",ligne)
+			outcomment = re.search("\*\/",ligne)
+
+			if ( (( inscript_one  is not None ) and ( inscript_two is not None )) or ( inscript_three is not None )  ):
+				isInScript=1
+			if(outcript is not None):
+				isInScript=0
+
+			if(incomment is not None):
+				isInComment=1
+			if(outcomment is not None):
+				isInComment=0
+
+			nbrLigne+=1	
+			result = re.search("new ",ligne)				
+			if ( result is not None ) and ( isInScript is not  1) and (intraduct is None)  and (isInComment is not 1):
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
