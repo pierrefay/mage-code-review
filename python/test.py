@@ -155,16 +155,97 @@ loadsTemplatesLog.write("</table>\n")
 
 
 ############################
+###   Fin du fichier     ###
+############################
+
+loadsTemplatesLog.write("</body>")
+loadsTemplatesLog.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################
 ###     ANALYSE BDD      ###
 ############################
 
+# violation de contraintes etrangéres en bdd ?
+# presence de traduction dans core_translate (aucune attendue)
+# url relative dans le contenu statique (pages et blocs cms)
+# table de logs volumineuse
+# custom url pour l'admin
+# utilisateurs et droits API pas trop nombreux ?
+# on verifie que le package utilisé n'est pas default (templates et skin)  (surcharge du theme obligée  pour etre propre)
+# nombre de website /store/storeview
+# taille des tables de logs
+# taille de la table sales_flat_quote
+# taxes, montants renseignés en BO HT ou TTC ?
+# flat_table (produits et catégorie) activé ?
+# nombre de produits
+# nombre de clients
+# nombre de catégories
+# nombre d'inscrits à la newsletter
+# nombre de commandes
+# compilation activée ?
+# utilisation d'un CDN ?
+#
+#################################################
+###     TESTS FICHIERS                        ###
+#################################################
+# est ce que le core a été modifié ?
+# comparaison index.php avec le standard
+# presence du downloader
+# nombre de surcharges / conflits ?
+# module local Mage ?
+# encodage non utf8
+# .htaccess limitant les acces dans app, lib, var et tout autre dossier non media ou js/theme
+# liste des modules commaunautaires => qu'est ce qu'ils font ? => faire un tableau avec un descriptif, nom = Attribuer une note de "confiance"
+
+
+#################################################
+###     COMPARAISON PERF NATIF / PAS NATIF    ###
+#################################################
+# mesure des pages
+# mesure des actions...
 
 #########################################################################
-###     PERFORMANCE FRONT (prod ou url accessible depuis internet     ###
+###     PERFORMANCE FRONT (prod ou url accessible depuis internet )   ###
 #########################################################################
+# analyse css / js etc...comme analytics
+# analyse scripts qu'on pourrait mettre en asynchrone
+# google page speed insight
 
-###
-### Fin du fichier
-###
-loadsTemplatesLog.write("</body>")
-loadsTemplatesLog.close()
+##############################
+###     INIT DE L'AUDIT    ###
+##############################
+# description de l'environnement de test (pc, os,  version apache, php, mysql, editeur..)
+
+
+#### CODE
+# getSingleton dnas les templates
+# url relatives dans les templates ?
+# css en dure dans les fichiers
+# var_dump, print_r, zend_debug::dump()
+# chaines non encapsulé par un helper de traduction
+# code lourd (foreach avec load,..)
+# custom url pour l'admin (pas "admin")
+# fonction header('Location...);
+# on compte le nombre de rewrite
+# activation du developer mode
+# methode de cache utilisée ?
+# version de magento ?
+
+
+
