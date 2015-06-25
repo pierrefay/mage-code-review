@@ -1,2 +1,3 @@
-# MagentoCodeAnalysis
-Outils d'analyse de code magento
+# mage-core-review
+
+Analysis tool for magento code review
