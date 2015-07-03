@@ -1,5 +1,4 @@
-# -*- coding: iso-8859-1 -*-
-
+# -*-coding:Latin-1 -*
 import os
 class Repertoire:
 
