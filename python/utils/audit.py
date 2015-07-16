@@ -3,6 +3,7 @@ import sys
 import glob
 import re
 import cgi
+import zlib
 from utils.repertoire import Repertoire
 
 class Audit:
@@ -25,9 +26,9 @@ class Audit:
 			for namespace in namespaceDirs:
 				nombreDeModules += rep.countFolders(path+'app/code/'+codePool+'/'+namespace+'/')
 			nombreDeModulesTotal = nombreDeModulesTotal + nombreDeModules
-			retour +=  "- codePool : "+codePool+" ("+str(nombreDeNamespaces)+" namespaces, "+str(nombreDeModules)+" modules) <br />\n"
+			retour +=  "- codePool : "+codePool+" ("+str(nombreDeNamespaces)+" namespaces, "+str(nombreDeModules)+" modules) \n"
+		retour+="\n## Total  : "+str(nombreDeNamespacesTotal)+" namespaces et "+str(nombreDeModulesTotal)+"\n"
 		retour+="\n"
-		retour+="<br  />  <strong>Total  :</strong>  "+str(nombreDeNamespacesTotal)+" namespaces et "+str(nombreDeModulesTotal)+" modules. \n"
 		
 		return retour
 
@@ -75,7 +76,10 @@ class Audit:
 							search_for_new =self.searchForNew(path+ligne, dossierLog,1)
 							if(len(search_for_new) is not 0):
 								results['code_search_for_new'].append(search_for_new)
-
+							
+#load in loop dans le  code
+							search_for_code_load_in_loop =self.searchForLoadInLoop(path+ligne, dossierLog)
+							
 							#globalPHP dans le  code
 							search_for_globalphp =self.searchForPhpGlobals(path+ligne, dossierLog)
 							if(len(search_for_globalphp) is not 0):
@@ -90,13 +94,12 @@ class Audit:
 							search_for_logs =self.searchForLogs(path+ligne, dossierLog)
 							if(len(search_for_logs) is not 0):
 								results['code_logs'].append(search_for_logs)
-
-							#A FAIRE LOAD COUTEUX
+							
 
 					#si dans design
 					if(re.search(r"app\/design",path+ligne)):	
 			
-						#ici on est dans chaque fichier du dossier
+						#ici on est dans chaque fichier du dossier 
 						if(ligne.endswith('.phtml')):
 
 							#load dans les templates
@@ -104,6 +107,9 @@ class Audit:
 							if(len(search_for_load) is not 0):
 								results['template_search_for_load'].append(search_for_load)
 
+							#search for load in loop dans les templates
+							search_for_load_in_loop =self.searchForLoadInLoop(path+ligne, dossierLog)
+							
 							#getblock dans les templates
 							search_for_getblock =self.searchForGetblock(path+ligne, dossierLog)
 							if(len(search_for_getblock) is not 0):
@@ -151,7 +157,7 @@ class Audit:
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))	
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))	
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
@@ -172,7 +178,7 @@ class Audit:
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
@@ -189,15 +195,83 @@ class Audit:
 			nbrLigne+=1	
 			post = re.search(r"\$_POST",ligne)
 			get = re.search(r"\$_GET",ligne)
-			glo = re.search(r"\$_GLOBAL",ligne)	
-			if ( (post is not None) or (get is not None) or (glo is not None) ):
+			glo = re.search(r"\$_GLOBALS",ligne)	
+			sess = re.search(r"\$_SESSION",ligne)
+			if ( (post is not None) or (get is not None) or (glo is not None) or (sess is not None) ):
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))	
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))	
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
+
+	#
+	# Fonction qui repere les getBlock dans les templates
+	#
+	def searchForLoadInLoop(self, path, dossierLog):
+		fichier = open(path, 'r')  
+		nbrLigne=0	
+		nbrLoads=0	
+		enterInLoop=0
+		detecloop=0  
+		inloop=0	
+		continuer=0
+		retoursAll=[]
+		for ligne in fichier:
+			nbrLigne+=1	
+			result = re.search(r"->load\(",ligne)					
+			if result is not None:
+				 filee = open(path, 'r')
+				 for line in filee:
+					 for i in range(0, len(line)):
+						if(line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and ( line[i+3]==' ' or line[i+3]=='{') ):
+							detecloop=1
+
+						if(line[i]=='f' and line[i+1]=='o' and  line[i+1]=='r' and  line[i+1]=='e' and  line[i+1]=='a' and  line[i+1]=='c' and  line[i+1]=='h' and ( line[i+1]==' ' or line[i+1]=='{') ):
+							detecloop=1
+						if(line[i]=='d' and line[i+1]=='o' and ( line[i+1]==' ' or line[i+1]=='{') ):
+							detecloop=1
+						if(line[i]=='w' and line[i+1]=='h' and line[i+2]=='i' and line[i+3]=='l' and line[i+4]=='e'  and ( line[i+1]==' ' or line[i+1]=='{') ):
+							detecloop=1
+
+						if(detecloop == 1):
+							 if(line[i]=='{'):
+								enterInLoop=1
+								detecloop=0  
+							
+
+						if(enterInLoop == 1):
+						
+							if(line[i]=='{'):
+								inloop=inloop+1
+															
+							if(line[i]=='}'):
+								inloop=inloop-1
+								if(inloop==0):
+									enterInLoop=0
+
+							if(line[i]=='-' and line[i+1]=='>' and line[i+2]=='l' and line[i+3]=='o' and line[i+4]=='a' and line[i+5]=='d' and line[i+6]=='(' ):		
+								
+								retours={}
+								retours['path'] = path
+								retours['ligne'] = str(nbrLigne)  
+								retours['contents']=(ligne[0:50].strip(" \t\n\r"))
+								print('test' +path+'| '+str(nbrLigne)+'| '+(ligne[0:50].strip(" \t\n\r")))
+								continuer=1
+								break
+						if(continuer==1):
+							break
+
+			if(continuer==1):
+				continuer=0
+				continue
+			
+						
+						
+					
+					 
+					
 
 	#
 	# Fonction qui repere les fonctions de logs 
@@ -214,11 +288,13 @@ class Audit:
 			exp3 = re.search(r"mage_debug::dump\(",ligne)	
 			exp4 = re.search(r"Mage_Debug::dump\(",ligne)
 			exp5 = re.search(r"->debug\(\);",ligne)
-			if ( (exp1 is not None) or (exp2 is not None) or (exp3 is not None) or (exp4 is not None) or (exp5 is not None)):
-				retours = {}
+			exp6 = re.search(r"debug_backtrace\(",ligne)
+			exp7 = re.search(r"debug_print_backtrace\(",ligne)
+			if ( (exp1 is not None) or (exp2 is not None) or (exp3 is not None) or (exp4 is not None) or (exp5 is not None) or (exp6 is not None) or (exp7 is not None)):
+				retours = {} 
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
@@ -233,12 +309,12 @@ class Audit:
 		retoursAll=[]
 		for ligne in fichier:
 			nbrLigne+=1	
-			mysql = re.search(r"mysql_",ligne)	
+			mysql = re.search(r"mysql\_",ligne)	
 			if ( (mysql is not None)):
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
@@ -259,7 +335,7 @@ class Audit:
 				retours = {}
 				retours['path'] = path
 				retours['ligne'] = str(nbrLigne)  
-				retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))
+				retours['contents']=(ligne[0:50].strip(" \t\n\r"))
 				retoursAll.append(retours)
 				nbrLoads+=1
 		return retoursAll
@@ -315,7 +391,7 @@ class Audit:
 					retours = {}
 					retours['path'] = path
 					retours['ligne'] = str(nbrLigne)  
-					retours['contents']=cgi.escape(ligne[0:200].strip(" \t\n\r"))	
+					retours['contents']=(ligne[0:50].strip(" \t\n\r"))	
 					retoursAll.append(retours)
 					nbrLoads+=1
 		return retoursAll

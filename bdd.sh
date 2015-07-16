@@ -52,6 +52,7 @@ show_statistics()
 }
 show_database_size()
 {
+	echo ""
 	echo -e "\033[31m##############################"
 	echo -e "\033[31m### DATABASE TABLES SIZES  ###"
 	echo -e "\033[31m##############################"
@@ -67,9 +68,7 @@ show_database_size()
 	echo "SELECT count(*) FROM $BDD_NAME.$BDD_PREFIX""log_visitor_online" | echo -e "\033[37m- \033[32mSize of online visitor logs:\033[37m $(sendbddN)"
 	echo "SELECT count(*) FROM $BDD_NAME.$BDD_PREFIX""sales_flat_quote" | echo -e "\033[37m- \033[32mSize of sales_flat_quote:\033[37m $(sendbddN)"
 	echo "SELECT count(*) FROM $BDD_NAME.$BDD_PREFIX""core_url_rewrite;" | echo -e "\033[37m- \033[32mSize of core_url_rewrite:\033[37m $(sendbddN)"
-
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'catalog/frontend/flat_catalog_product';" | echo -e  "\033[37m- \033[32mFlat table product activated ?\033[37m $(yesno $(sendbddN))"
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'catalog/frontend/flat_catalog_category';" | echo -e "\033[37m- \033[32mFlat table catégorie activated ?\033[37m $(yesno $(sendbddN))"
+	echo ""
 }
 
 show_theme_configuration()
@@ -92,13 +91,17 @@ show_theme_configuration()
 	echo "SELECT scope, scope_id, value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'design/theme/layout';" |  echo -e "\033[37m $(sendbddT)"
 	echo ""
 
-	echo -e "\033[37m- \033[32mTemes used (skin) (scope, value):"
+	echo -e "\033[37m- \033[32mThemes used (skin) (scope, value):"
 	echo "SELECT scope, scope_id, value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'design/theme/skin';" |  echo -e "\033[37m $(sendbddT)"
 	echo ""
 
 	echo -e "\033[37m- \033[32mTemes used (default) (scope, value): " 
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/js/merge_files';" | echo -e "\033[37m- \033[32mJS merge activated ?\033[37m $(yesno $(sendbddN))"
+	echo "SELECT scope, scope_id, value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'design/theme/default';" |  echo -e "\033[37m $(sendbddT)"
+
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/js/merge_files';" | echo -e "\033[37m- \033[32mJS merge activated ?  \033[37m $(yesno $(sendbddN))"
+
 	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/css/merge_css_files';" | echo -e "\033[37m- \033[32mCSS merge activated ?\033[37m $(yesno $(sendbddN))"
+	echo ""
 }
 
 show_security()
@@ -117,43 +120,45 @@ show_security()
 	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'web/cookie/cookie_lifetime';" | echo -e "\033[37m- \033[32mCookie lifetime:\033[37m $(sendbddN)"
 	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/restrict/allow_ips';" | echo -e "\033[37m- \033[32mIP Restrictions on the profiler ?\033[37m  $(sendbddN)"
 	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/debug/profiler';" | echo -e "\033[37m- \033[32mProfiler activated ?\033[37m  $(yesno $(sendbddN))"
+	echo ""
 }
 
-show_bad_practices()
+show_good_practices()
 {
 	echo ""
-	echo -e "\033[31m#####################"
-	echo -e "\033[31m### BAD PRACTICE  ###"
-	echo -e "\033[31m#####################"
+	echo -e "\033[31m######################"
+	echo -e "\033[31m### GOOD PRACTICE  ###"
+	echo -e "\033[31m######################"
 	echo ""
 	echo "SELECT count(*) FROM $BDD_NAME.$BDD_PREFIX""core_translate;" | echo -e "\033[37m- \033[32mTranslation in core_translate table:\033[37m $(sendbddN)"
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/translate_inline/active';" | echo -e "\033[37m- \033[32mInline translation activated on frontend ?\033[37m $(yesno $(sendbdd))"
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'tax/calculation/price_includes_tax';" | echo -e "\033[37m- \033[32mShow catalog price including tax ?\033[37m  $(yesno $(sendbddN))"
-	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'tax/calculation/shipping_includes_tax';" | echo -e "\033[37m- \033[32mShow shipping price including tax ?\033[37m $(yesno $(sendbddN))"
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'dev/translate_inline/active';" | echo -e "\033[37m- \033[32mInline translation activated on frontend ?\033[37m $(yesno $(sendbddN))"
+	echo -e "\033[32m "
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'catalog/frontend/flat_catalog_product';" | echo -e  "\033[37m- \033[32mFlat table product activated ?\033[37m $(yesno $(sendbddN))"
 
-	echo -e "\033[37m- \033[32mIs there static url in pages ?"
-	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_page where content like '%http://$BASEURL%';" | echo $(sendbddN) > $OUTPUT_FOLDER/cms_page_static.txt 
-	echo -e "\033[32m" 
-	cat $OUTPUT_FOLDER/cms_page_static.txt
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'catalog/frontend/flat_catalog_category';" | echo -e "\033[37m- \033[32mFlat table catégorie activated ?\033[37m $(yesno $(sendbddN))"
+	echo -e "\033[32m "
 
-	echo ""
-	echo -e "\033[32m  >\033[37m see $OUTPUT_FOLDER/cms_page_static.txt"
-	echo -e "\033[37m- \033[32mIs there static url in cms blocks ?"
-	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_block where content like '%http://$BASEURL%';" | echo $(sendbddN) > $OUTPUT_FOLDER/cms_block_static.txt
-	echo -e "\033[32m" 
-	cat $OUTPUT_FOLDER/cms_block_static.txt
+	echo -e "\033[37m- \033[32mStatic url in cms page :\033[32m"
+	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_page where content like '%http://$BASEURL%';" | echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_page_static.txt
+	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/cms_page_static.txt"
+	echo -e "\033[32m "
 
-	echo ""
-	echo -e "\033[32m  >\033[37m see $OUTPUT_FOLDER/cms_block_static.txt"
+	echo -e "\033[37m- \033[32mStatic url in cms block :"
+	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_block where content like '%http://$BASEURL%';" |  echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_block_static.txt
+	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/cms_block_static.txt"
+	echo -e "\033[32m " 
+	#cat $OUTPUT_FOLDER/cms_block_static.txt
+
+	
 	echo -e "\033[37m- \033[32mNon UTF-8 encoded files:"
 	cd $BASEFOLDER && find $BASEFOLDER/app/ -type f | xargs -I {} bash -c "iconv -f utf-8 -t utf-16 {} &>/dev/null || echo {}" > $OUTPUT_FOLDER/non-utf8.txt
+	#cat $OUTPUT_FOLDER/non-utf8.txt
+	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/no-utf8.txt"		
 	echo -e "\033[32m" 
-	cat $OUTPUT_FOLDER/non-utf8.txt
-	echo ""
-	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/no-utf8.txt"
-
+	
 	echo -e "\033[37m- \033[32mCompilation state:"
-	echo -e "\033[37m $(php $BASEFOLDER/shell/compiler.php state)"
+	echo -e "\033[37m$(php $BASEFOLDER/shell/compiler.php state)"
+	echo -e "\033[32m" 
 }
 
 show_database_check()
@@ -207,20 +212,36 @@ show_rewrites()
 	cat $OUTPUT_FOLDER/conflicts_rewrite.txt
 }
 
+show_config()
+{
+	echo ""
+	echo -e "\033[31m##############################"
+	echo -e "\033[31m### MAGENTO CONFIGURATION  ###"
+	echo -e "\033[31m##############################"
+	echo ""
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'tax/calculation/price_includes_tax';" | echo -e "\033[37m- \033[32mShow catalog price including tax ?\033[37m  $(yesno $(sendbddN))"
+	echo "SELECT value FROM $BDD_NAME.$BDD_PREFIX""core_config_data WHERE path LIKE 'tax/calculation/shipping_includes_tax';" | echo -e "\033[37m- \033[32mShow shipping price including tax ?\033[37m $(yesno $(sendbddN))"
+	echo ""
+}
+
+help() 
+{
+	echo -e "\033[32m -stat			\033[37mGet all statistics about your magento platform" 
+	echo -e  "\033[32m -config		\033[37mGet get the configuration of your magento platform" 
+	echo -e "\033[32m -db:size		\033[37mGet the size of : your logs table, sales flat quote table, url rewrite table "
+	echo -e "\033[32m -practice:good		\033[37mGet all your bad practices" 
+	echo -e "\033[32m -practice:security	\033[37mGet all security bad practices" 
+	echo -e "\033[32m -dev:rewrite		\033[37mGet all informations about your rewrite"  
+	echo -e "\033[32m -theme:config		\033[37mGet all informations about the use of your theme"
+	echo -e "\033[32m --all			\033[37mLaunch a full analysis of your plateform" 
+	echo -e "\033[32m --help			\033[37mGet Help about this command  (that's why you've got this message)" 
+}
+
 
 
 echo -e "\033[37m"
-
-if [ "$#" -ne 2 ]; then
-	echo "Illegal number of parameters use :  <magento_folder> <mysql_folder>"   
-	BASEFOLDER="/var/www/html"
-	MYSQL_FOLDER="/data/tabledarc/mysql"
-	#exit
-else
-	BASEFOLDER="$1"
-	BASEURL="$2"
-fi
-   
+  
+BASEFOLDER="/var/www/html"
 BDD_HOST=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "host")
 BDD_PREFIX=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "prefix")
 BDD_NAME=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "name")
@@ -236,39 +257,53 @@ else
 	chmod 777 $BASEFOLDER/codetest
 fi
 
+if [ $# -gt 0 ]
+then	
+	while [ $# -gt 0 ]
+	do
+	    case $1 in
+		-stat) echo "$(show_statistics)" ;;
+	
+		-config) echo "$(show_config)" ;;
 
-while [ $# -gt 0 ]
-do
-    case $1 in
-        -stat) echo "$(show_statistics)" ;;
+		-db:size) echo "$(show_database_size)" ;;
 
-	-db:size) echo "$(show_database_size)" ;;
+		-db:check) echo "$(show_database_check)" ;;
 
-	-db:check) echo "$(show_database_check)" ;;
 
-	-practice:bad) echo "$(show_bad_practices)" ;;
+		-practice:good) echo "$(show_good_practices)" ;;
 
-	-practice:security) echo "$(show_security)" ;;
+		-practice:security) echo "$(show_security)" ;;
 
-	-config:rewrite) echo "$(show_rewrites)" ;;
 
-	-theme:config) echo "$(show_theme_configuration)" ;;
+		-dev:rewrite) echo "$(show_rewrites)" ;;
 
-	--all)  echo "$(show_statistics)" echo "$(show_database_size)"	echo "$(show_bad_practices)" echo "$(show_security)" 	echo "$(show_rewrites)"  echo "$(show_theme_configuration)" ;;
-	--help) 
-		echo -e "\033[32m -stat			\033[37mGet all statistics about your magento platform" 
-		echo -e "\033[32m -db:size		\033[37mGet the size of all your database table"
-		echo -e "\033[32m -practice:bad		\033[37mGet all your bad practices" 
-		echo -e "\033[32m -practice:security	\033[37mGet all security bad practices" 
-		echo -e "\033[32m -config:rewrite	\033[37mGet all informations about your rewrite"  
-		echo -e "\033[32m -theme:config		\033[37mGet all informations about the use of your theme"
-		echo -e "\033[32m --all			\033[37mLaunch a full analysis of your plateform" 
-		echo -e "\033[32m --help			\033[37mGet Help about this command  (that's why you've got this message)" 
 
-    esac
-    shift
-done
-echo -e "\033[37m"
+		-theme:config) echo "$(show_theme_configuration)" ;;
+
+
+		--all)  echo "$(show_statistics)" \
+			echo "$(show_config)" \
+			echo "$(show_database_size)" \
+			echo "$(show_database_check)" \
+			echo "$(show_good_practices)" \
+			echo "$(show_security)" \
+			echo "$(show_rewrites)" \
+			echo "$(show_theme_configuration)" ;;
+	
+		--help) echo "$(help)";;
+
+		*) echo "$(help)" ;;
+
+	    esac
+	    shift
+	done
+	echo -e "\033[37m"
+else
+ echo "$(help)" 
+fi
+echo ""
+echo ""
 exit
 
 

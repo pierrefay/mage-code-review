@@ -1,263 +1,196 @@
 # -*- coding: iso-8859-1 -*-
-
+import os,sys
 from utils.audit import Audit
+from prettytable import PrettyTable
 
 audit = Audit()
 
-dossierLog =  '/home/pierre/Desktop/tabledarc/annexes/'
-path = '/data/tabledarc/html/'
+dossierLog =  '/var/www/html/codetest/'
+path = '/var/www/html/'
 
-
-#on lance toutes les recherches
 result = audit.analyserLeCode(path, dossierLog, None)
 etatPlateforme = audit.nbrNamespaceAndModule(path,dossierLog)
 
 
-#on construit le rapport
-
-############################
-###   Debut du fichier   ###
-############################
-
-loadsTemplatesLog = open(dossierLog+"load-in-template.html", "w")
-loadsTemplatesLog.write("<head>")
-loadsTemplatesLog.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">")
-loadsTemplatesLog.write("</head>")
-loadsTemplatesLog.write("<body>")
-
 ############################
 ###     ETAT GENERAL     ###
 ############################
-loadsTemplatesLog.write("<h2>Etat général de la plateforme</h2>\n")
-### Analyse des modules ###
-loadsTemplatesLog.write("<h3>Modules et namespaces</h3>\n")
-loadsTemplatesLog.write(etatPlateforme)
+fileToWrite = open(dossierLog+"number_of_modules.txt", "w")
+fileToWrite.write("################################\n")
+fileToWrite.write("###   Modules and namespaces ###\n")
+fileToWrite.write("################################\n")
+fileToWrite.write(etatPlateforme)
+fileToWrite.write("\n\n")
 
-############################
-###      TEMPLATES       ###
-############################
-loadsTemplatesLog.write("<h2>Etat des templates</h2>\n")
 
 #############################
 ### Loads dans templates  ###
-loadsTemplatesLog.write("<h3>Loads dans les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+#############################
+fileToWrite = open(dossierLog+"loads_in_templates.txt", "w")
+fileToWrite.write("###############################\n")
+fileToWrite.write("###    Loads in templates   ###\n")
+fileToWrite.write("###############################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_search_for_load']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
-############################
-### getBlock dans templates  ###
-loadsTemplatesLog.write("<h3>GetBlock dans les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
-tab=result['template_search_for_getblock']
-for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
 
 ###################################
-### createBlock dans templates  ###
-loadsTemplatesLog.write("<h3>CreateBlock dans les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+### createBlock in templates    ###
+###################################
+fileToWrite = open(dossierLog+"createblock_in_templates.txt", "w")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("###    createBlock in templates   ###\n")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_search_for_createblock']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
-
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
 ###################################
-### new dans templates  ###
-loadsTemplatesLog.write("<h3>New dans les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+###      new in templates       ###
+###################################
+fileToWrite = open(dossierLog+"new_in_templates.txt", "w")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("###        new in templates       ###\n")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_search_for_new']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
 ###################################
 ### PHP globals dans templates  ###
-loadsTemplatesLog.write("<h3>Appels PHP globals les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+###################################
+fileToWrite = open(dossierLog+"php_in_templates.txt", "w")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("###  PHP functions in templates   ###\n")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_global_php']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
 
-###################################
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
+
+#######################################
 ### Fonctions mysql dans templates  ###
-loadsTemplatesLog.write("<h3>Appels aux fonctions mysql dans les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+#######################################
+fileToWrite = open(dossierLog+"mysql_in_templates.txt", "w")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("###  Mysql functions in templates   ###\n")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_mysql']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
 
-#################################
-### Logs dans les templates  ###
-loadsTemplatesLog.write("<h3>Logs les templates</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
+#######################################
+###     Logs dans les templates     ###
+#######################################
+fileToWrite = open(dossierLog+"logs_in_templates.txt", "w")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("###    Logs dans les templates    ###\n")
+fileToWrite.write("#####################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['template_logs']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
-
-############################
-###         CODE         ###
-############################
-
-loadsTemplatesLog.write("<h2>Etat du code</h2>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
 #########################
-### new dans le code  ###
-loadsTemplatesLog.write("<h3>New dans le code</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+### new in the code   ###
+#########################
+fileToWrite = open(dossierLog+"new_in_code.txt", "w")
+fileToWrite.write("########################\n")
+fileToWrite.write("### new in the code  ###\n")
+fileToWrite.write("########################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['code_search_for_new']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
 #################################
-### PHP globals dans le code  ###
-loadsTemplatesLog.write("<h3>Appels PHP globals le code</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+### php function in the code  ###
+#################################
+fileToWrite = open(dossierLog+"php_in_code.txt", "w")
+fileToWrite.write("#################################\n")
+fileToWrite.write("### php function in the code  ###\n")
+fileToWrite.write("#################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['code_global_php']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
-#################################
-### Logs dans le code  ###
-loadsTemplatesLog.write("<h3>Logs le code</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
-
+##################################
+### logs function in the code  ###
+##################################
+fileToWrite = open(dossierLog+"logs_in_code.txt", "w")
+fileToWrite.write("###################################\n")
+fileToWrite.write("### logs functions in the code  ###\n")
+fileToWrite.write("###################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['code_logs']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
-#################################
-###    Mysql dans le code  ###
-loadsTemplatesLog.write("<h3>Appels aux fonctions mysql dans le code</h3>\n")
-loadsTemplatesLog.write("<table style=\"border:1px solid #000;text-align:left;\">\n")
-loadsTemplatesLog.write("<tr><th>Fichier</th><th style=\"width:100px;\">Ligne</th><th>Début de la ligne concernée</th></tr>\n")
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
+#################################
+###    Mysql dans le code     ###
+#################################
+fileToWrite = open(dossierLog+"mysql_in_code.txt", "w")
+fileToWrite.write("#################################\n")
+fileToWrite.write("###   Mysql dans le code      ###\n")
+fileToWrite.write("#################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
 tab=result['code_mysql']
 for res in tab:
-	loadsTemplatesLog.write("<tr><td>"+res[0]['path']+"</td><td>"+res[0]['ligne']+"</td><td>"+res[0]['contents']+"</td></tr>\n")
-loadsTemplatesLog.write("</table>\n")
-
-
-############################
-###   Fin du fichier     ###
-############################
-
-loadsTemplatesLog.write("</body>")
-loadsTemplatesLog.close()
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-############################
-###     ANALYSE BDD      ###
-############################
-
-# violation de contraintes etrangéres en bdd ?
-# presence de traduction dans core_translate (aucune attendue)
-# url relative dans le contenu statique (pages et blocs cms)
-# table de logs volumineuse
-# custom url pour l'admin
-# utilisateurs et droits API pas trop nombreux ?
-# on verifie que le package utilisé n'est pas default (templates et skin)  (surcharge du theme obligée  pour etre propre)
-# nombre de website /store/storeview
-# taille des tables de logs
-# taille de la table sales_flat_quote
-# taxes, montants renseignés en BO HT ou TTC ?
-# flat_table (produits et catégorie) activé ?
-# nombre de produits
-# nombre de clients
-# nombre de catégories
-# nombre d'inscrits à la newsletter
-# nombre de commandes
-# compilation activée ?
-# utilisation d'un CDN ?
-#
-#################################################
-###     TESTS FICHIERS                        ###
-#################################################
-# est ce que le core a été modifié ?
-# comparaison index.php avec le standard
-# presence du downloader
-# nombre de surcharges / conflits ?
-# module local Mage ?
-# encodage non utf8
-# .htaccess limitant les acces dans app, lib, var et tout autre dossier non media ou js/theme
-# liste des modules commaunautaires => qu'est ce qu'ils font ? => faire un tableau avec un descriptif, nom = Attribuer une note de "confiance"
-
-
-#################################################
-###     COMPARAISON PERF NATIF / PAS NATIF    ### 
-#################################################
-# mesure des pages
-# mesure des actions...
-
-#########################################################################
-###     PERFORMANCE FRONT (prod ou url accessible depuis internet )   ###
-#########################################################################
-# analyse css / js etc...comme analytics
-# analyse scripts qu'on pourrait mettre en asynchrone
-# google page speed insight
-
-##############################
-###     INIT DE L'AUDIT    ###
-##############################
-# description de l'environnement de test (pc, os,  version apache, php, mysql, editeur..)
-
-
-#### CODE
-# getSingleton dnas les templates
-# url relatives dans les templates ?
-# css en dure dans les fichiers
-# var_dump, print_r, zend_debug::dump()
-# chaines non encapsulé par un helper de traduction
-# code lourd (foreach avec load,..)
-# custom url pour l'admin (pas "admin")
-# fonction header('Location...);
-# on compte le nombre de rewrite
-# activation du developer mode
-# methode de cache utilisée ?
-# version de magento ?
-#
 
 
