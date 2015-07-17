@@ -40,6 +40,23 @@ fileToWrite.write(x.get_string())
 fileToWrite.write("\n\n")
 
 
+########################################
+### Loads in Loops in the templates  ###
+########################################
+fileToWrite = open(dossierLog+"loads_in_loop_in_templates.txt", "w")
+fileToWrite.write("###################################\n")
+fileToWrite.write("### Loads in Loops in the templates  ###\n")
+fileToWrite.write("###################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
+tab=result['template_search_for_load_in_loop']
+for res in tab:
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
+
+
 ###################################
 ### createBlock in templates    ###
 ###################################
@@ -150,6 +167,22 @@ fileToWrite.write("\n")
 x = PrettyTable(["File", "Line", "Beginning of the line"])
 x.padding_width = 1
 tab=result['code_global_php']
+for res in tab:
+	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
+fileToWrite.write(x.get_string())
+fileToWrite.write("\n\n")
+
+#####################################
+### Loads in Loops in the code  ###
+#####################################
+fileToWrite = open(dossierLog+"loads_in_loop_in_code.txt", "w")
+fileToWrite.write("###################################\n")
+fileToWrite.write("### Loads in Loops in the code  ###\n")
+fileToWrite.write("###################################\n")
+fileToWrite.write("\n")
+x = PrettyTable(["File", "Line", "Beginning of the line"])
+x.padding_width = 1
+tab=result['code_search_for_load_in_loop']
 for res in tab:
 	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
 fileToWrite.write(x.get_string())

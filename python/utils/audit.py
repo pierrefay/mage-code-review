@@ -44,6 +44,7 @@ class Audit:
 			results['code_global_php']=[]
 			results['code_mysql']=[]
 			results['code_logs']=[]
+			results['code_search_for_load_in_loop']=[]
 			#templates
 			results['template_search_for_load']=[]
 			results['template_search_for_getblock']=[]
@@ -52,6 +53,7 @@ class Audit:
 			results['template_global_php']=[]
 			results['template_mysql']=[]
 			results['template_logs']=[]
+			results['template_search_for_load_in_loop']=[]
 		else:
 			results=tab
 
@@ -77,8 +79,10 @@ class Audit:
 							if(len(search_for_new) is not 0):
 								results['code_search_for_new'].append(search_for_new)
 							
-#load in loop dans le  code
-							search_for_code_load_in_loop =self.searchForLoadInLoop(path+ligne, dossierLog)
+							#load in loop dans le  code
+							search_for_code_load_in_loop = self.searchForLoadInLoop(path+ligne, dossierLog)
+							if(len(search_for_code_load_in_loop) is not 0):
+								results['code_search_for_load_in_loop'].append(search_for_code_load_in_loop)
 							
 							#globalPHP dans le  code
 							search_for_globalphp =self.searchForPhpGlobals(path+ligne, dossierLog)
@@ -107,8 +111,11 @@ class Audit:
 							if(len(search_for_load) is not 0):
 								results['template_search_for_load'].append(search_for_load)
 
-							#search for load in loop dans les templates
-							search_for_load_in_loop =self.searchForLoadInLoop(path+ligne, dossierLog)
+							#load in loop dans le  code
+							search_for_template_load_in_loop =self.searchForLoadInLoop(path+ligne, dossierLog)
+							if(len(search_for_template_load_in_loop) is not 0):
+								results['template_search_for_load_in_loop'].append(search_for_template_load_in_loop)
+							
 							
 							#getblock dans les templates
 							search_for_getblock =self.searchForGetblock(path+ligne, dossierLog)
@@ -219,53 +226,71 @@ class Audit:
 		continuer=0
 		retoursAll=[]
 		for ligne in fichier:
+			detecloop=0
 			nbrLigne+=1	
 			result = re.search(r"->load\(",ligne)					
 			if result is not None:
 				 filee = open(path, 'r')
 				 for line in filee:
 					 for i in range(0, len(line)):
-						if(line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and ( line[i+3]==' ' or line[i+3]=='{') ):
+						if(len(line)>i+3 and line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and  line[i+3]=='('):						
+							detecloop=1
+						if(len(line)>i+4 and line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and  line[i+3]==' ' and  line[i+4]=='('):						
 							detecloop=1
 
-						if(line[i]=='f' and line[i+1]=='o' and  line[i+1]=='r' and  line[i+1]=='e' and  line[i+1]=='a' and  line[i+1]=='c' and  line[i+1]=='h' and ( line[i+1]==' ' or line[i+1]=='{') ):
+						if(len(line) >= i+7 and line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and  line[i+3]=='e' and  line[i+4]=='a' and  line[i+5]=='c' and  line[i+6]=='h'  and  line[i+7]=='(' ):
 							detecloop=1
-						if(line[i]=='d' and line[i+1]=='o' and ( line[i+1]==' ' or line[i+1]=='{') ):
+						if(len(line) >= i+8 and line[i]=='f' and line[i+1]=='o' and  line[i+2]=='r' and  line[i+3]=='e' and  line[i+4]=='a' and  line[i+5]=='c' and  line[i+6]=='h'  and  line[i+7]==' ' and  line[i+8]=='(' ):
+							detecloop=1	
+
+						if(len(line) >= i+2 and line[i]=='d' and line[i+1]=='o' and line[i+2]=='{'):
 							detecloop=1
-						if(line[i]=='w' and line[i+1]=='h' and line[i+2]=='i' and line[i+3]=='l' and line[i+4]=='e'  and ( line[i+1]==' ' or line[i+1]=='{') ):
+						
+						if(len(line) >= i+3 and line[i]=='d' and line[i+1]=='o' and line[i+2]==' ' and line[i+3]=='{'):
+							detecloop=1
+
+						if(len(line) >= i+5 and line[i]=='w' and line[i+1]=='h' and line[i+2]=='i' and line[i+3]=='l' and line[i+4]=='e' and line[i+5]=='{' ):
+							detecloop=1
+
+						if(len(line) >= i+6 and line[i]=='w' and line[i+1]=='h' and line[i+2]=='i' and line[i+3]=='l' and line[i+4]=='e' and line[i+5]==' ' and line[i+6]=='('):
 							detecloop=1
 
 						if(detecloop == 1):
-							 if(line[i]=='{'):
+							if(line[i]=='{'):
 								enterInLoop=1
-								detecloop=0  
+								detecloop=0
+								inloop=0  
 							
 
 						if(enterInLoop == 1):
-						
+					
 							if(line[i]=='{'):
 								inloop=inloop+1
-															
+														
 							if(line[i]=='}'):
 								inloop=inloop-1
 								if(inloop==0):
 									enterInLoop=0
 
-							if(line[i]=='-' and line[i+1]=='>' and line[i+2]=='l' and line[i+3]=='o' and line[i+4]=='a' and line[i+5]=='d' and line[i+6]=='(' ):		
-								
+							if(enterInLoop==1 and line[i]=='-' and line[i+1]=='>' and line[i+2]=='l' and line[i+3]=='o' and line[i+4]=='a' and line[i+5]=='d' and line[i+6]=='('):				
+							
 								retours={}
 								retours['path'] = path
 								retours['ligne'] = str(nbrLigne)  
 								retours['contents']=(ligne[0:50].strip(" \t\n\r"))
-								print('test' +path+'| '+str(nbrLigne)+'| '+(ligne[0:50].strip(" \t\n\r")))
+								retoursAll.append(retours)
 								continuer=1
 								break
+
 						if(continuer==1):
 							break
+				
 
 			if(continuer==1):
 				continuer=0
 				continue
+
+		return retoursAll
 			
 						
 						
