@@ -5,8 +5,8 @@ from prettytable import PrettyTable
 
 audit = Audit()
 
-dossierLog =  '/var/www/html/codetest/'
-path = '/var/www/html/'
+dossierLog =  '/var/www/html/lta/codetest/'
+path = '/var/www/html/lta/'
 
 result = audit.analyserLeCode(path, dossierLog, None)
 etatPlateforme = audit.nbrNamespaceAndModule(path,dossierLog)

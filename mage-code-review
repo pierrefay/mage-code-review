@@ -212,6 +212,11 @@ show_rewrites()
 	cat $OUTPUT_FOLDER/conflicts_rewrite.txt
 }
 
+code_analysis_full()
+{
+  python "$BASEFOLDER/mage-code-review/test.py"
+}
+
 show_config()
 {
 	echo ""
@@ -241,7 +246,7 @@ help()
 
 echo -e "\033[37m"
   
-BASEFOLDER="/var/www/html"
+BASEFOLDER="/var/www/html/lta"
 BDD_HOST=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "host")
 BDD_PREFIX=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "prefix")
 BDD_NAME=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "name")
@@ -249,7 +254,7 @@ BDD_USERNAME=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "username")
 BDD_USERPASS=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "userpass")
 OUTPUT_FOLDER="$BASEFOLDER/codetest"
 
-if [ -d "$BASEFOLDER/codetest" ]
+if [ -d "$BASEFOLDER/codetest" ] test
 then
 	echo ""
 else
@@ -265,6 +270,8 @@ then
 		-stat) echo "$(show_statistics)" ;;
 	
 		-config) echo "$(show_config)" ;;
+		
+		-code:full) echo "$(code_analysis_full)" ;;
 
 		-db:size) echo "$(show_database_size)" ;;
 
