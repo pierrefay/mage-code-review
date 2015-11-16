@@ -238,8 +238,9 @@ help()
 	echo -e "\033[32m -practice:security	\033[37mGet all security bad practices" 
 	echo -e "\033[32m -dev:rewrite		\033[37mGet all informations about your rewrite"  
 	echo -e "\033[32m -theme:config		\033[37mGet all informations about the use of your theme"
-	echo -e "\033[32m --all			\033[37mLaunch a full analysis of your plateform" 
-	echo -e "\033[32m --help			\033[37mGet Help about this command  (that's why you've got this message)" 
+	echo -e "\033[32m -code:full			\033[37mPerform a CODE analysis of your plateform"
+	echo -e "\033[32m --all			\033[37mLaunch a full analysis of your plateform"
+	echo -e "\033[32m --help			\033[37mGet Help about this command  (that's why you've got this message)"
 }
 
 
@@ -296,8 +297,9 @@ then
 			echo "$(show_good_practices)" \
 			echo "$(show_security)" \
 			echo "$(show_rewrites)" \
-			echo "$(show_theme_configuration)" ;;
-	
+			echo "$(show_theme_configuration)" \
+	        echo "$(code_analysis_full)" ;;
+
 		--help) echo "$(help)";;
 
 		*) echo "$(help)" ;;
