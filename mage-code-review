@@ -17,13 +17,13 @@ ttcht () {
 	fi
 }
 sendbddN(){
-	echo $(mysql -u $BDD_USERNAME  -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST -N)
+	echo $(mysql -u $BDD_USERNAME -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST -N)
 }
 sendbdd(){
-	echo $(mysql -u $BDD_USERNAME  -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST)
+	echo $(mysql -u $BDD_USERNAME -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST)
 }
 sendbddT(){
-	echo $(mysql --table -u $BDD_USERNAME  -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST)
+	echo $(mysql --table -u $BDD_USERNAME -p$BDD_USERPASS $BDD_NAME -h $BDD_HOST)
 }
 
 
@@ -139,22 +139,25 @@ show_good_practices()
 	echo -e "\033[32m "
 
 	echo -e "\033[37m- \033[32mStatic url in cms page :\033[32m"
-	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_page where content like '%http://$BASEURL%';" | echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_page_static.txt
+	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_page where content like '%http://%';" | echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_page_static.txt
 	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/cms_page_static.txt"
 	echo -e "\033[32m "
+	cat $OUTPUT_FOLDER/cms_page_static.txt
 
 	echo -e "\033[37m- \033[32mStatic url in cms block :"
-	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_block where content like '%http://$BASEURL%';" |  echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_block_static.txt
+	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_block where content like '%http://%';"
+	echo "SELECT identifier FROM $BDD_NAME.$BDD_PREFIX""cms_block where content like '%http://%';" |  echo "$(sendbddN)" > $OUTPUT_FOLDER/cms_block_static.txt
 	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/cms_block_static.txt"
 	echo -e "\033[32m " 
-	#cat $OUTPUT_FOLDER/cms_block_static.txt
+	cat $OUTPUT_FOLDER/cms_block_static.txt
 
 	
 	echo -e "\033[37m- \033[32mNon UTF-8 encoded files:"
-	cd $BASEFOLDER && find $BASEFOLDER/app/ -type f | xargs -I {} bash -c "iconv -f utf-8 -t utf-16 {} &>/dev/null || echo {}" > $OUTPUT_FOLDER/non-utf8.txt
+	find $BASEFOLDER/app/ -type f | xargs -I {} bash -c "iconv -f utf-8 -t utf-16 {} &>/dev/null || echo {}" > $OUTPUT_FOLDER/non-utf8.txt
 	#cat $OUTPUT_FOLDER/non-utf8.txt
 	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/no-utf8.txt"		
-	echo -e "\033[32m" 
+	echo -e "\033[32m"
+	cat $OUTPUT_FOLDER/utf8.txt
 	
 	echo -e "\033[37m- \033[32mCompilation state:"
 	echo -e "\033[37m$(php $BASEFOLDER/shell/compiler.php state)"
@@ -181,12 +184,12 @@ show_database_check()
 	fi
 
 	echo -e "\033[37m- \033[32mLooking for table configuration:"
-	cd $BASEFOLDER && magerun db:maintain:check-tables > $OUTPUT_FOLDER/list_table_config.txt
+	php ../n98-magerun.phar db:maintain:check-tables > $OUTPUT_FOLDER/list_table_config.txt
 	echo -e "\033[32m    >\033[37m see $OUTPUT_FOLDER/list_table_config.txt"
 	cat $OUTPUT_FOLDER/list_table_config.txt
 
 	echo -e "\033[32m - MysqlCheck"
-	mysqlcheck -u $BDD_NAME  -p$BDD_PASS -c $BDD_NAME -h $BASEURL > $OUTPUT_FOLDER/mysqlCheck.txt
+	#mysqlcheck -u $BDD_NAME  -p$BDD_PASS -c $BDD_NAME -h $BDD_HOST > $OUTPUT_FOLDER/mysqlCheck.txt
 	echo -e "\033[32m   >\033[37m see $OUTPUT_FOLDER/mysqlCheck.txt"
 	cat $OUTPUT_FOLDER/mysqlCheck.txt
 }
@@ -200,13 +203,13 @@ show_rewrites()
 	echo ""
 
 	echo -e "\033[32mAnalysing module rewrites:"
-	cd $BASEFOLDER && magerun dev:module:rewrite:list > $OUTPUT_FOLDER/list_rewrite.txt
+	php ../n98-magerun.phar dev:module:rewrite:list > $OUTPUT_FOLDER/list_rewrite.txt
 	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/list_rewrite.txt"
 	echo -e "\033[32m" 
 	cat $OUTPUT_FOLDER/list_rewrite.txt
 	 
 	echo -e "\033[32mRewrites Conflics:"
-	cd $BASEFOLDER && magerun dev:module:rewrite:conflicts > $OUTPUT_FOLDER/conflicts_rewrite.txt
+	php ../n98-magerun.phar dev:module:rewrite:conflicts > $OUTPUT_FOLDER/conflicts_rewrite.txt
 	echo -e "\033[32m>\033[37m see $OUTPUT_FOLDER/conflicts_rewrite.txt"
 	echo -e "\033[32m" 
 	cat $OUTPUT_FOLDER/conflicts_rewrite.txt
@@ -214,7 +217,7 @@ show_rewrites()
 
 code_analysis_full()
 {
-  python "$BASEFOLDER/mage-code-review/test.py"
+  python3 "$BASEFOLDER/mage-code-review/python/test.py"
 }
 
 show_config()
@@ -247,15 +250,22 @@ help()
 
 echo -e "\033[37m"
   
-BASEFOLDER="/var/www/html/lta"
-BDD_HOST=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "host")
-BDD_PREFIX=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "prefix")
-BDD_NAME=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "name")
-BDD_USERNAME=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "username")
-BDD_USERPASS=$(python "$BASEFOLDER/mage-code-review/getConfig.py" "userpass")
+BASEFOLDER=".."
+BDD_HOST=$(python3 "$BASEFOLDER/mage-code-review/getConfig.py" "host")
+BDD_PREFIX=$(python3 "$BASEFOLDER/mage-code-review/getConfig.py" "prefix")
+BDD_NAME=$(python3 "$BASEFOLDER/mage-code-review/getConfig.py" "name")
+BDD_USERNAME=$(python3 "$BASEFOLDER/mage-code-review/getConfig.py" "username")
+BDD_USERPASS=$(python3 "$BASEFOLDER/mage-code-review/getConfig.py" "userpass")
 OUTPUT_FOLDER="$BASEFOLDER/codetest"
 
-if [ -d "$BASEFOLDER/codetest" ] test
+echo $BDD_HOST
+echo $BDD_PREFIX
+echo $BDD_NAME
+echo $BDD_USERNAME
+echo $BDD_USERPASS
+echo $OUTPUT_FOLDER
+
+if [ -d "$BASEFOLDER/codetest" ]
 then
 	echo ""
 else

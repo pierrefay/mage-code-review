@@ -5,8 +5,8 @@ from prettytable import PrettyTable
 
 audit = Audit()
 
-dossierLog =  '/var/www/html/lta/codetest/'
-path = '/var/www/html/lta/'
+dossierLog =  '../codetest/'
+path = '../'
 
 result = audit.analyserLeCode(path, dossierLog, None)
 etatPlateforme = audit.nbrNamespaceAndModule(path,dossierLog)
@@ -217,7 +217,7 @@ x.padding_width = 1
 tab=result['code_mysql']
 for res in tab:
 	x.add_row([res[0]['path'] , res[0]['ligne'] , res[0]['contents']])
-fileToWrite.write(x.get_string())
+fileToWrite.write(x.get_string().encode('utf-8'))
 fileToWrite.write("\n\n")
 
 
